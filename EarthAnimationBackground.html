@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Animated Earth Background</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        .content {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Здесь может быть контент вашего сайта -->
+    <div class="content">
+        <h1>Ваш контент</h1>
+        <p>Здесь может быть любое содержимое вашего сайта</p>
+    </div>
+
+    <canvas id="canvas"></canvas>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Инициализация сцены
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({
+            canvas: document.querySelector('#canvas'),
+            antialias: true
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+
+        // Создание земли
+        const earthGeometry = new THREE.SphereGeometry(7, 64, 64);
+        const earthTexture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg');
+        const earthMaterial = new THREE.MeshPhongMaterial({
+            map: earthTexture,
+            bumpMap: earthTexture,
+            bumpScale: 0.1,
+        });
+        const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+        scene.add(earth);
+
+        // Добавление освещения
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+        scene.add(ambientLight);
+        const pointLight = new THREE.PointLight(0xffffff, 1);
+        pointLight.position.set(15, 15, 15);
+        scene.add(pointLight);
+
+        // Добавление звезд
+        const starGeometry = new THREE.BufferGeometry();
+        const starMaterial = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 0.1
+        });
+
+        const starVertices = [];
+        for(let i = 0; i < 10000; i++) {
+            const x = (Math.random() - 0.5) * 2000;
+            const y = (Math.random() - 0.5) * 2000;
+            const z = (Math.random() - 0.5) * 2000;
+            starVertices.push(x, y, z);
+        }
+
+        starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+
+        // Позиционирование камеры
+        camera.position.z = 15;
+
+        // Анимация
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Медленное вращение земли
+            earth.rotation.y += 0.0003;
+            
+            renderer.render(scene, camera);
+        }
+
+        // Обработка изменения размера окна
+        window.addEventListener('resize', onWindowResize, false);
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
