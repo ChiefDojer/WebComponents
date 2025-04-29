@@ -1,2 +1,2 @@
-# webComponents
+# WebComponents
 Web Components
